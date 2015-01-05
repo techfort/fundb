@@ -17,8 +17,22 @@ var data = [{
 	age: 50
 }];
 
-var ageIndex = fdb.index(data, function (a, b) {
-	return a.age > b.age;
-});
+var FILE = 'test.json',
+	fs = require('fs'),
+	ageIndex = fdb.index(data, function (a, b) {
+		return a.age > b.age;
+	}),
+	ageFilter = fdb.curryQuery(function (obj) {
+		return obj.age > 29;
+	}),
+	writeFile = fdb.curryWrite(FILE, fs.writeFile),
+	writeSuccessful = function (err) {
+		if (err) {
+			console.log('File ' + FILE + ' not saved');
+		}
+		console.log('File ' + FILE + ' saved');
+	};
 
 console.log(ageIndex);
+console.log(ageFilter(data));
+writeFile(JSON.stringify(data), writeSuccessful);

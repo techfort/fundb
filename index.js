@@ -1,5 +1,5 @@
 module.exports = (function () {
-  var fdb = {};
+  var FunDB = {};
 
   function query(coll, fun) {
     return coll.filter(fun);
@@ -56,7 +56,6 @@ module.exports = (function () {
       index = [];;
     copy.forEach(addTestIndex);
 
-    console.log(copy);
     copy.sort(sortFun);
     copy.forEach(function (elem) {
       index.push(+elem.$tempIndex);
@@ -70,13 +69,34 @@ module.exports = (function () {
     callback();
   }
 
-  fdb.query = query;
-  fdb.reduce = reduce;
-  fdb.andTest = andTest;
-  fdb.orTest = orTest;
-  fdb.fork = fork;
-  fdb.index = index;
-  fdb.addData = addData;
-  return fdb;
+  function curryWrite(filename, writeFun) {
+    return function (callback) {
+      writeFun.apply(null, [filename, callback]);
+    }
+  }
+
+  function curryData(coll) {
+    return function (filter) {
+      return query(coll, filter);
+    }
+  }
+
+  function curryQuery(filter) {
+    return function (coll) {
+      return query(coll, filter);
+    }
+  }
+
+  FunDB.query = query;
+  FunDB.reduce = reduce;
+  FunDB.andTest = andTest;
+  FunDB.orTest = orTest;
+  FunDB.fork = fork;
+  FunDB.index = index;
+  FunDB.addData = addData;
+  FunDB.curryWrite = curryWrite;
+  FunDB.curryQuery = curryQuery;
+
+  return FunDB;
 
 })();

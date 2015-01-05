@@ -1,4 +1,4 @@
-# FDB
+# FunDB
 
 a functional database
 

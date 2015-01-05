@@ -1,0 +1,24 @@
+{
+  "name": "FunDB",
+  "version": "0.0.1",
+  "description": "funktional programming database",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/techfort/fdb.git"
+  },
+  "keywords": [
+    "functional",
+    "programming",
+    "database"
+  ],
+  "author": "joe minichino <joe.minichino@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/techfort/fdb/issues"
+  },
+  "homepage": "https://github.com/techfort/fdb"
+}
