@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/techfort/fdb/issues"
   },
-  "homepage": "https://github.com/techfort/fdb"
+  "homepage": "https://github.com/techfort/fdb",
+  "dependencies": {
+    "msgpack5": "^1.3.5"
+  }
 }

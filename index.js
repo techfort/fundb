@@ -89,8 +89,8 @@ module.exports = (function () {
 
   FunDB.query = query;
   FunDB.reduce = reduce;
-  FunDB.andTest = andTest;
-  FunDB.orTest = orTest;
+  FunDB.and = andTest;
+  FunDB.or = orTest;
   FunDB.fork = fork;
   FunDB.index = index;
   FunDB.addData = addData;
