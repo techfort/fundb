@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <title>Fundb by techfort</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Fundb</h1>
+        <h2></h2>
+
+        <section id="downloads">
+          <a href="https://github.com/techfort/fundb/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/techfort/fundb/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/techfort/fundb" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h1>
+<a id="functionaldb-fundb" class="anchor" href="#functionaldb-fundb" aria-hidden="true"><span class="octicon octicon-link"></span></a>Fun(ctional)DB (FunDB)</h1>
+
+<p>Fun(ctional)DB is an experiment that follows the <a href="http://en.wikipedia.org/wiki/Unix_philosophy">Unix philosophy</a> (small &amp; specific).
+As most database systems in existence are monolithic, both in size and mentailty, this experiments aims at taking the opposite approach.
+As such it is not a drop-in replacement for any db system in existence, rather a "new" option to be considered.</p>
+
+<p>tl; dr FunDB is a micro functional programming library performing database functions such </p>
+
+<ul>
+<li>querying / filtering</li>
+<li>sorting</li>
+<li>indexing</li>
+<li>searching</li>
+</ul>
+
+<p>or better also, a micro-database that is storage agnostic and client agnostic.</p>
+
+<h2>
+<a id="overview" class="anchor" href="#overview" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overview</h2>
+
+<p>The point of FunDB is to extract state from the database as much as possible. You can manage writes to disk outside of FunDB (see an example in test.js) and only perform processing with FunDB.</p>
+
+<p>You can use FunDB in two ways: plain functions or curried around a data collection (which means you do not need to inject your data in the db functions anymore).</p>
+
+<h2>
+<a id="fundb-plain-functions" class="anchor" href="#fundb-plain-functions" aria-hidden="true"><span class="octicon octicon-link"></span></a>FunDB plain functions</h2>
+
+<p><code>curry(fun, arg)</code>: the heart of FunDB is a simple curry function, which takes a function and the first argument of that function. Given a function <code>f(a, b, c, d)</code> you can call <code>curry(f, 'hello')</code> which returns a function equivalent to <code>f('hello', b, c, d)</code>. Note that <code>curry</code> only curries one argument at a time (unlike the more advanced curry function in <a href="http://ramdajs.com/docs/R.html#curry">ramda</a>)</p>
+
+<p><code>query(filterFun, array)</code>: this effectively operating a <code>filter</code> on the array, and returning a filtered array.</p>
+
+<p><code>reduce(reduceFun, array)</code>: again, operates a native <code>reduce</code> on the array, returns the reduced value.</p>
+
+<p><code>index(sortFun, array)</code>: this function returns an object index, which contains a property <code>ids</code> which is an array of integers representing the order of the elements in <code>array</code> as sorted by the function <code>sortFun</code>. So if you have an array of objects, each object containing the property <code>age</code>, you could use a sort function like <code>function (a, b) { return a.age &gt; b.age; }</code> (which sorts the array elements in ascending age order). Except, the originally array is untouched, while an object <code>index</code> is returned. This index object has the following properties:</p>
+
+<ul>
+<li>
+<code>ids</code>: an array of integer representing the order of elements of the original array if they were to be sorted by <code>sortFun</code>
+</li>
+<li>
+<code>first()</code>: gets the first element in the original array according to <code>sortFun</code> (i.e. the object with the lowest age value)</li>
+<li>
+<code>last()</code>: get the last element (i.e. the oldest person in the array)</li>
+<li>
+<code>get(position)</code>: gets the element in the original array corresponding to that position in the index</li>
+<li>
+<code>insert(item, pos)</code>: inserts an element into the original array and updates the index of ids <code>ids</code> (<em>NOTE</em>: this is the only function with a side effect in that the original array is mutated).</li>
+</ul>
+
+<p><code>searchSorted(array, index, item, compareFun)</code>: this function performs a binary search on <code>array</code>, utilising the index object <code>index</code>, on an item <code>item</code> utilising the (optional) comparison function <code>compareFun</code>. <code>compareFun</code> only needs to be there in case the concept of <code>less</code> or <code>equal</code> is not as obvious as comparing numbers or strings (i.e. you may want to compare the length of a string for some). <code>compareFun</code> takes two arguments <code>a</code> and <code>b</code> and compares them, returnning <code>-1</code> if a is "less" than b, <code>0</code> if the search is a match (and the position in the array will be included in the object returned), and <code>1</code> if a is "greater" than b. The function returns an object with two properties: <code>found</code> to indicate the item was found and <code>index</code> which indicates the position at which the item was found or the position at which the item would be inserted if you were to insert it in the original array. You would use the index method <code>insert(item, pos)</code> to operate that.</p>
+
+<p><code>and(array, filtersArray)</code>: this function queries the original array against all the filter functions contained in the array <code>filtersArray</code>. Returns an array containing elements that passed all filter tests. Each filter function needs to return a boolean value (true for pass, false for fail). An example usage would be <code>fundb.and(array, [filterByAgeFunction, filterByLanguageFunction])</code>.</p>
+
+<p><code>or(array, filtersArray)</code>: like <code>and</code> but it performs an <code>OR</code> operation between filters and returns an array containing all elements that passed at least one of the filter function tests. Filter function criteria are identical to <code>and</code>.</p>
+
+<p><code>curryFilter(filterFunction)</code>: takes a filter function and returns a curried <code>query</code> function which can then be called on an array to apply the filter. I.e. <code>var byAge = function (obj) { return obj.age &gt; 30; }</code> and then call <code>byAge(array)</code> to obtain an array of elements that pass the test. This is a utility method, you could just as easily run <code>fundb.curry(fundb.query, filterFunction)</code>.</p>
+
+<h2>
+<a id="array-centric-functions" class="anchor" href="#array-centric-functions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Array-centric functions</h2>
+
+<p><code>FunDB.curry(array)</code>: this function returns an object with all the above functions as methods (it performs a curry on the array on all those functions and associates them to a single object), except you can skip referencing the data array. So for example after calling: <code>var db = FunDB.curry(array);</code> you can then do <code>db.index(sortFun)</code> or <code>db.query(filterFun)</code> etc.. In summary the object will have the following methods available: </p>
+
+<ul>
+<li><code>db.query(filterFun)</code></li>
+<li><code>db.index(sortFun)</code></li>
+<li><code>db.search(index, item, compareFun)</code></li>
+<li><code>db.or(filtersArray)</code></li>
+<li><code>db.and(filtersArray)</code></li>
+<li><code>db.reduce(reduceFun)</code></li>
+</ul>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
