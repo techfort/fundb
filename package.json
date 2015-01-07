@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/techfort/fdb",
   "dependencies": {
-    "msgpack5": "^1.3.5"
+    "msgpack5": "^1.3.5",
+    "stream": "0.0.2"
   }
 }
