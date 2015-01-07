@@ -1,3 +1,20 @@
+/**-----------------------------------------------------
+ *
+ * `7MM"""YMM                       `7MM"""Yb. `7MM"""Yp,
+ *   MM    `7                         MM    `Yb. MM    Yb
+ *   MM   d `7MM  `7MM  `7MMpMMMb.    MM     `Mb MM    dP
+ *   MM""MM   MM    MM    MM    MM    MM      MM MM"""bg.
+ *   MM   Y   MM    MM    MM    MM    MM     ,MP MM    `Y
+ *   MM       MM    MM    MM    MM    MM    ,dP' MM    ,9
+ * .JMML.     `Mbod"YML..JMML  JMML..JMMmmmdP' .JMMmmmd9
+ *
+ * A tiny Functional Programming library that works
+ * like a database that supports (and|or) queries, sorting and indexing
+ *
+ * @author joe minichino <joe.minichino@gmail.com>
+ *
+ * ------------------------------------------------------*/
+
 module.exports = (function () {
 
   function curry() {
@@ -27,18 +44,6 @@ module.exports = (function () {
       result = query(filters[i], result);
     }
     return result;
-  }
-
-  function arrayUnique(array) {
-    var a = array.concat();
-    for (var i = 0; i < a.length; ++i) {
-      for (var j = i + 1; j < a.length; ++j) {
-        if (JSON.stringify(a[i]) === JSON.stringify(a[j]))
-          a.splice(j--, 1);
-      }
-    }
-
-    return a;
   }
 
   function orTest(coll, filters) {
@@ -104,26 +109,7 @@ module.exports = (function () {
     return index(sortFun, coll);
   }
 
-  function addData(coll, obj, callback) {
-    coll.push(obj);
-    if (callback) {
-      callback(coll.length - 1);
-    }
-  }
-
-  function curryWrite(writeFun, filename) {
-    return function (callback) {
-      writeFun.apply(null, [filename, callback]);
-    }
-  }
-
-  function curryData(coll) {
-    return function (filter) {
-      return query(filter, coll);
-    }
-  }
-
-  function curryQuery(filter) {
+  function curryFilter(filter) {
     return function (coll) {
       return query(filter, coll);
     }
@@ -166,20 +152,17 @@ module.exports = (function () {
   FunDB.or = orTest;
   FunDB.fork = fork;
   FunDB.index = index;
-  FunDB.addData = addData;
-  FunDB.curryWrite = curryWrite;
-  FunDB.curryQuery = curryQuery;
   FunDB._ = curry;
+  FunDB.curryFilter = curryFilter;
   FunDB.search = searchSorted;
   FunDB.curry = function (coll) {
     var db = {};
-    db.query = curryData(coll);
-    db.index = FunDB._(iindex, coll);
-    db.search = FunDB._(searchSorted, coll);
-    db.or = FunDB._(orTest, coll);
-    db.and = FunDB._(andTest, coll);
-    db.reduce = FunDB._(ireduce, coll);
-    db.addData = FunDB._(addData, coll);
+    db.query = curry(iquery, coll);
+    db.index = curry(iindex, coll);
+    db.search = curry(searchSorted, coll);
+    db.or = curry(orTest, coll);
+    db.and = curry(andTest, coll);
+    db.reduce = curry(ireduce, coll);
     return db;
   };
 
